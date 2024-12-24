@@ -16,19 +16,17 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const cookieStore = cookies()
-  const supabase = createServerComponentClient({ cookies: () => cookieStore })
+  const cookieStore = cookies();
+  const supabase = createServerComponentClient({ cookies: () => cookieStore });
   
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  
+
 
   return (
     <html lang="en" data-theme="light">
       <body className={inter.className}>
-        
         <Providers>{children}</Providers>
       </body>
     </html>
-  )
+  );
 }

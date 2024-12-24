@@ -55,7 +55,8 @@ export default function Auth() {
     }
   }
 
-  const handleDemoLogin = async () => {
+  const handleDemoLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true)
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -67,7 +68,8 @@ export default function Auth() {
 
       toast.success('Logged in with demo account')
       router.push('/admin/dashboard')
-    } catch (error: any) {
+    } catch (error) {
+      console.error(error);
       toast.error('Demo login failed')
     } finally {
       setIsLoading(false)
