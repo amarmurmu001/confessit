@@ -55,26 +55,7 @@ export default function Auth() {
     }
   }
 
-  const handleDemoLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true)
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: 'demo@example.com',
-        password: 'demo123',
-      })
-
-      if (error) throw error
-
-      toast.success('Logged in with demo account')
-      router.push('/admin/dashboard')
-    } catch (error) {
-      console.error(error);
-      toast.error('Demo login failed')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  
 
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center">
