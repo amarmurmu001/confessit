@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
+import { PostgrestError } from '@supabase/supabase-js'
+
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true)
@@ -26,45 +28,48 @@ export default function Auth() {
     checkAdminLoggedIn()
   }, [router, supabase])
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
 
-    try {
-      if (!isLogin && password !== confirmPassword) {
-        toast.error('Passwords do not match')
-        return
-      }
+const handleAuth = async (e: React.FormEvent) => {
+  e.preventDefault()
+  setIsLoading(true)
 
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        })
-
-        if (error) throw error
-
-        toast.success('Logged in successfully')
-        router.push('/admin/dashboard')
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/admin/auth/callback`,
-          },
-        })
-
-        if (error) throw error
-
-        toast.success('Check your email to confirm your account')
-      }
-    } catch (error: any) {
-      toast.error(error.message)
-    } finally {
-      setIsLoading(false)
+  try {
+    if (!isLogin && password !== confirmPassword) {
+      toast.error('Passwords do not match')
+      return
     }
+
+    let error: PostgrestError | null = null;
+
+    if (isLogin) {
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      error = loginError;
+    } else {
+      const { error: signupError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/admin/auth/callback`,
+        },
+      })
+      error = signupError;
+    }
+
+    if (error) throw error
+
+    toast.success(isLogin ? 'Logged in successfully' : 'Check your email to confirm your account')
+    router.push('/admin/dashboard')
+  } catch (error: PostgrestError) {
+    toast.error(error.message)
+  } finally {
+    setIsLoading(false)
   }
+}
+
+  
 
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center">
