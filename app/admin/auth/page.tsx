@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
@@ -14,6 +14,17 @@ export default function Auth() {
   
   const router = useRouter()
   const supabase = createClientComponentClient()
+
+  useEffect(() => {
+    const checkAdminLoggedIn = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        router.push('/admin/dashboard') // Redirect to admin dashboard or another page
+      }
+    }
+
+    checkAdminLoggedIn()
+  }, [router, supabase])
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,8 +66,6 @@ export default function Auth() {
     }
   }
 
-  
-
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center">
       <div className="max-w-4xl w-full p-4 flex flex-col lg:flex-row gap-8 items-center">
@@ -70,8 +79,6 @@ export default function Auth() {
               ? 'Access the admin dashboard to manage confessions and moderate content.'
               : 'Create an admin account to start managing confessions and moderating content.'}
           </p>
-          
-          
         </div>
 
         {/* Auth Form */}
