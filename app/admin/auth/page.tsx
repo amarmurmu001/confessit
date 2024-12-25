@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
+import { AuthError } from '@supabase/supabase-js'
 
 export default function Auth() {
   const [email, setEmail] = useState('')
@@ -22,7 +23,7 @@ export default function Auth() {
     setLoading(true)
 
     try {
-      let { data, error } = isSignUp
+      const { data, error } = isSignUp
         ? await supabase.auth.signUp({
             email,
             password,
@@ -37,12 +38,16 @@ export default function Auth() {
 
       if (isSignUp) {
         toast.success('Check your email for the confirmation link!')
-      } else if (data.session) {
+      } else if (data?.session) {
         // Silently redirect without toast for successful login
         router.replace(redirectedFrom || '/admin/dashboard')
       }
-    } catch (error: any) {
-      toast.error(error.message)
+    } catch (error) {
+      if (error instanceof AuthError) {
+        toast.error(error.message)
+      } else {
+        toast.error('An error occurred during authentication')
+      }
     } finally {
       setLoading(false)
     }
