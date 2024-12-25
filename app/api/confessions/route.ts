@@ -4,9 +4,8 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   try {
-    const { content, name, isAnonymous } = await request.json()
+    const { content, name, is_anonymous } = await request.json()
 
-    // Validate request body
     if (!content?.trim()) {
       return NextResponse.json(
         { error: 'Confession content is required' },
@@ -14,19 +13,23 @@ export async function POST(request: Request) {
       )
     }
 
-    // Initialize Supabase client
-    const supabase = createRouteHandlerClient({ cookies })
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
 
-    // Insert confession into database
+    // Get the current admin's session
+    const { data: { session } } = await supabase.auth.getSession()
+    const admin_id = session?.user?.id
+
     const { data, error } = await supabase
       .from('confessions')
       .insert([
         {
           confession_text: content.trim(),
-          name: isAnonymous ? null : name?.trim(),
-          is_anonymous: isAnonymous,
-          is_shared: false // Default to false, will be set to true after moderation
-        }
+          name: is_anonymous ? null : name?.trim(),
+          is_anonymous,
+          is_shared: false,
+          admin_id: admin_id || null, // Store the admin_id who created the confession
+        },
       ])
       .select()
       .single()
@@ -39,12 +42,49 @@ export async function POST(request: Request) {
       )
     }
 
-    return NextResponse.json(
-      { message: 'Confession submitted successfully', confession: data },
-      { status: 201 }
-    )
+    return NextResponse.json(data)
   } catch (error) {
     console.error('Error processing confession:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function GET(request: Request) {
+  try {
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+
+    // Get the current admin's session
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Get confessions created by the current admin
+    const { data: confessions, error } = await supabase
+      .from('confessions')
+      .select('*')
+      .eq('admin_id', session.user.id)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching confessions:', error)
+      return NextResponse.json(
+        { error: 'Failed to fetch confessions' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json(confessions)
+  } catch (error) {
+    console.error('Error processing request:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

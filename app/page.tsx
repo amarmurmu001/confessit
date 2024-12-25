@@ -1,8 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import ConfessionForm from '@/components/ConfessionForm'
 import { ArrowRightIcon, SparklesIcon, ShieldCheckIcon, HeartIcon } from '@heroicons/react/24/outline'
+import Link from 'next/link'
 
 export default function Home() {
   return (
@@ -30,13 +30,13 @@ export default function Home() {
             transition={{ delay: 0.2, duration: 0.5 }}
             className="flex justify-center gap-4"
           >
-            <a 
-              href="#confess" 
+            <Link 
+              href="/admin/auth" 
               className="group flex items-center gap-2 px-6 py-3 bg-primary text-primary-content rounded-full text-lg font-medium hover:bg-primary/90 transition-all"
             >
-              Share Now
+              Admin Login
               <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </a>
+            </Link>
           </motion.div>
 
           {/* Trust Indicators */}
@@ -152,35 +152,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Confession Form Section */}
-      <section id="confess" className="py-20 px-4 bg-base-100">
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl font-bold text-base-content mb-4">
-              Share Your Confession
-            </h2>
-            <p className="text-xl text-base-content/60">
-              Your story matters. Share it anonymously with our community.
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            viewport={{ once: true }}
-          >
-            <ConfessionForm />
-          </motion.div>
-        </div>
-      </section>
     </div>
   )
 }
@@ -208,15 +179,15 @@ const features = [
 
 const steps = [
   {
-    title: 'Write Your Story',
-    description: 'Share your thoughts and feelings in a judgment-free space.'
+    title: 'Login as Admin',
+    description: 'Access the admin dashboard to manage confessions.'
   },
   {
-    title: 'Submit Anonymously',
-    description: 'Your identity remains completely private and protected.'
+    title: 'Create Confession',
+    description: 'Write and submit confessions through the admin interface.'
   },
   {
-    title: 'Connect & Heal',
-    description: 'Be part of a supportive community that understands.'
+    title: 'Manage & Share',
+    description: 'Review, moderate, and share confessions with the community.'
   }
 ]

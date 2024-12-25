@@ -1,183 +1,211 @@
 'use client'
 
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import toast from 'react-hot-toast'
-import { useRouter } from 'next/navigation'
+import { EyeIcon, EyeSlashIcon, TrashIcon, ShareIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline'
 import DeleteModal from './DeleteModal'
-import { motion } from 'framer-motion'
+import Link from 'next/link'
 
-type Confession = {
+interface Form {
   id: string
-  confession_text: string
-  name: string | null
-  is_anonymous: boolean
-  is_shared: boolean
+  title: string
+  description: string | null
+  share_url: string
+  is_active: boolean
   created_at: string
+  form_responses: { count: number }[]
 }
 
-type AdminDashboardProps = {
-  confessions: Confession[]
+interface AdminDashboardProps {
+  forms: Form[]
 }
 
-export default function AdminDashboard({ confessions: initialConfessions }: AdminDashboardProps) {
-  const [confessions, setConfessions] = useState(initialConfessions)
-  const [filter, setFilter] = useState('all')
-  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
-  const [confessionToDelete, setConfessionToDelete] = useState<string | null>(null)
-  const [isLoading, setLoading] = useState(false)
-  const router = useRouter()
+export default function AdminDashboard({ forms }: AdminDashboardProps) {
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [selectedFormId, setSelectedFormId] = useState<string | null>(null)
+  const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const supabase = createClientComponentClient()
 
-  const handleShare = async (id: string, isShared: boolean) => {
+  const filteredForms = forms.filter(form => {
+    switch (filter) {
+      case 'active':
+        return form.is_active
+      case 'inactive':
+        return !form.is_active
+      default:
+        return true
+    }
+  })
+
+  const handleToggleActive = async (formId: string, currentState: boolean) => {
     try {
-      setLoading(true)
       const { error } = await supabase
-        .from('confessions')
-        .update({ is_shared: isShared })
-        .eq('id', id)
+        .from('confession_forms')
+        .update({ is_active: !currentState })
+        .eq('id', formId)
 
       if (error) throw error
 
-      setConfessions(confessions.map(conf =>
-        conf.id === id ? { ...conf, is_shared: isShared } : conf
-      ))
-
-      toast.success(`Confession ${isShared ? 'shared' : 'unshared'} successfully`)
-      router.refresh()
+      toast.success(`Form ${currentState ? 'deactivated' : 'activated'} successfully`)
     } catch (error) {
-      console.error('Error updating confession:', error)
-      toast.error('Failed to update confession')
-    } finally {
-      setLoading(false)
+      console.error('Error toggling form state:', error)
+      toast.error('Failed to update form state')
     }
   }
 
-  const handleDelete = (id: string) => {
-    setConfessionToDelete(id)
-    setDeleteModalOpen(true)
+  const handleDelete = (formId: string) => {
+    setSelectedFormId(formId)
+    setIsDeleteModalOpen(true)
   }
 
   const confirmDelete = async () => {
-    if (!confessionToDelete) return
+    if (!selectedFormId) return
 
     try {
-      setLoading(true)
       const { error } = await supabase
-        .from('confessions')
+        .from('confession_forms')
         .delete()
-        .eq('id', confessionToDelete)
+        .eq('id', selectedFormId)
 
       if (error) throw error
 
-      setConfessions(confessions.filter(conf => conf.id !== confessionToDelete))
-      toast.success('Confession deleted successfully')
-      router.refresh()
+      toast.success('Form deleted successfully')
+      setIsDeleteModalOpen(false)
     } catch (error) {
-      console.error('Error deleting confession:', error)
-      toast.error('Failed to delete confession')
-    } finally {
-      setLoading(false)
-      setDeleteModalOpen(false)
+      console.error('Error deleting form:', error)
+      toast.error('Failed to delete form')
     }
   }
 
-  const filteredConfessions = confessions.filter(conf => {
-    if (filter === 'today') {
-      return new Date(conf.created_at).toDateString() === new Date().toDateString()
+  const copyShareUrl = async (shareUrl: string) => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/forms/${shareUrl}`)
+      toast.success('Share URL copied to clipboard')
+    } catch (error) {
+      console.error('Error copying to clipboard:', error)
+      toast.error('Failed to copy URL')
     }
-    if (filter === 'shared') {
-      return conf.is_shared
-    }
-    if (filter === 'not_shared') {
-      return !conf.is_shared
-    }
-    return true
-  })
+  }
 
   return (
     <div>
-      <div className="flex justify-center mb-6">
-        <div className="inline-flex rounded-lg p-1 bg-pink-50">
-          {['all', 'today', 'shared', 'not_shared'].map((filterOption) => (
-            <button
-              key={filterOption}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                filter === filterOption 
-                  ? 'bg-white text-pink-600 shadow-sm' 
-                  : 'text-pink-600/60 hover:text-pink-600'
-              }`}
-              onClick={() => setFilter(filterOption)}
-            >
-              {filterOption.charAt(0).toUpperCase() + filterOption.slice(1).replace('_', ' ')}
-            </button>
-          ))}
-        </div>
+      {/* Filters */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => setFilter('all')}
+          className={`px-4 py-2 rounded-lg transition-colors ${
+            filter === 'all'
+              ? 'bg-primary text-primary-content'
+              : 'bg-base-200 text-base-content hover:bg-base-300'
+          }`}
+        >
+          All Forms
+        </button>
+        <button
+          onClick={() => setFilter('active')}
+          className={`px-4 py-2 rounded-lg transition-colors ${
+            filter === 'active'
+              ? 'bg-primary text-primary-content'
+              : 'bg-base-200 text-base-content hover:bg-base-300'
+          }`}
+        >
+          Active
+        </button>
+        <button
+          onClick={() => setFilter('inactive')}
+          className={`px-4 py-2 rounded-lg transition-colors ${
+            filter === 'inactive'
+              ? 'bg-primary text-primary-content'
+              : 'bg-base-200 text-base-content hover:bg-base-300'
+          }`}
+        >
+          Inactive
+        </button>
       </div>
 
-      {isLoading && (
-        <div className="text-center py-8">
-          <div className="w-8 h-8 border-2 border-pink-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      )}
-
-      {filteredConfessions.length === 0 && !isLoading ? (
-        <div className="text-center py-8 text-pink-600/60">
-          No confessions found
-        </div>
-      ) : (
-        <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-          {filteredConfessions.map((confession, index) => (
-            <motion.div
-              key={confession.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-              className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 border border-pink-100"
-            >
-              <div className="p-6">
-                <p className="text-lg font-medium text-gray-900">{confession.confession_text}</p>
-                <p className="text-sm text-pink-600/60 mt-2">
-                  {confession.is_anonymous ? 'Anonymous' : confession.name} - {
-                    new Date(confession.created_at).toLocaleString()
-                  }
-                </p>
-                <div className="flex justify-between items-center mt-4 pt-4 border-t border-pink-100">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <span className="text-sm text-pink-600/80">Shared</span>
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        checked={confession.is_shared}
-                        onChange={(e) => handleShare(confession.id, e.target.checked)}
-                        className="sr-only"
-                      />
-                      <div className={`w-10 h-6 rounded-full transition-colors ${
-                        confession.is_shared ? 'bg-pink-500' : 'bg-pink-200'
-                      }`}>
-                        <div className={`absolute w-4 h-4 rounded-full bg-white top-1 transition-transform ${
-                          confession.is_shared ? 'translate-x-5' : 'translate-x-1'
-                        }`} />
-                      </div>
-                    </div>
-                  </label>
-                  <button
-                    className="px-3 py-1 rounded-lg text-pink-600 hover:bg-pink-50 transition-colors text-sm"
-                    onClick={() => handleDelete(confession.id)}
-                  >
-                    Delete
-                  </button>
-                </div>
+      {/* Forms Grid */}
+      <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
+        {filteredForms.map((form, index) => (
+          <motion.div
+            key={form.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.1 }}
+            className="bg-base-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 border border-base-200"
+          >
+            <div className="p-6">
+              <h3 className="text-lg font-medium text-base-content mb-2">{form.title}</h3>
+              {form.description && (
+                <p className="text-base-content/60 mb-4">{form.description}</p>
+              )}
+              <div className="flex items-center gap-4 text-sm text-base-content/60 mb-4">
+                <span>{form.form_responses[0]?.count || 0} responses</span>
+                <span>•</span>
+                <span>{new Date(form.created_at).toLocaleDateString()}</span>
               </div>
-            </motion.div>
-          ))}
+              <div className="flex justify-between items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleToggleActive(form.id, form.is_active)}
+                    className="p-2 rounded-lg hover:bg-base-200 transition-colors text-base-content/80"
+                    title={form.is_active ? 'Deactivate form' : 'Activate form'}
+                  >
+                    {form.is_active ? (
+                      <EyeIcon className="w-5 h-5" />
+                    ) : (
+                      <EyeSlashIcon className="w-5 h-5" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => copyShareUrl(form.share_url)}
+                    className="p-2 rounded-lg hover:bg-base-200 transition-colors text-base-content/80"
+                    title="Copy share URL"
+                  >
+                    <ShareIcon className="w-5 h-5" />
+                  </button>
+                  <Link
+                    href={`/admin/forms/${form.id}/responses`}
+                    className="p-2 rounded-lg hover:bg-base-200 transition-colors text-base-content/80"
+                    title="View responses"
+                  >
+                    <DocumentDuplicateIcon className="w-5 h-5" />
+                  </Link>
+                </div>
+                <button
+                  onClick={() => handleDelete(form.id)}
+                  className="p-2 rounded-lg hover:bg-base-200 transition-colors text-base-content/80"
+                  title="Delete form"
+                >
+                  <TrashIcon className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Empty State */}
+      {filteredForms.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-base-content/60 mb-4">No confession forms found</p>
+          <Link
+            href="/admin/forms/create"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-content rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            Create your first form
+          </Link>
         </div>
       )}
 
+      {/* Delete Modal */}
       <DeleteModal
         isOpen={isDeleteModalOpen}
-        onDelete={confirmDelete}
-        onCancel={() => setDeleteModalOpen(false)}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Delete Form"
+        message="Are you sure you want to delete this form? All responses will be permanently deleted. This action cannot be undone."
       />
     </div>
   )

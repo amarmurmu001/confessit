@@ -1,15 +1,14 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import ThemeToggle from '@/components/ThemeToggle'
-import Navigation from '@/components/Navigation'
 import { Providers } from './providers'
+import ClientLayout from '@/components/ClientLayout'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Confessit - Share Your Story Anonymously',
-  description: 'A safe space to share your thoughts, feelings, and experiences without judgment.',
+  title: 'Confessit',
+  description: 'Share your thoughts anonymously',
 }
 
 export default function RootLayout({
@@ -21,9 +20,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen bg-base-100 text-base-content`}>
         <Providers>
-          <Navigation />
-          {children}
-          <ThemeToggle />
+          <ClientLayout>
+            {children}
+          </ClientLayout>
         </Providers>
       </body>
     </html>
