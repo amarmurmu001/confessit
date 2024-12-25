@@ -13,6 +13,7 @@ export async function middleware(req: NextRequest) {
 
     // If accessing admin routes without auth
     if (!session && req.nextUrl.pathname.startsWith('/admin') && req.nextUrl.pathname !== '/admin/auth') {
+      // Redirect to auth page without showing toast
       const redirectUrl = new URL('/admin/auth', req.url)
       redirectUrl.searchParams.set('redirectedFrom', req.nextUrl.pathname)
       return NextResponse.redirect(redirectUrl)
@@ -20,13 +21,13 @@ export async function middleware(req: NextRequest) {
 
     // If accessing auth page with session
     if (session && req.nextUrl.pathname === '/admin/auth') {
+      // Redirect to dashboard without showing toast
       return NextResponse.redirect(new URL('/admin/dashboard', req.url))
     }
 
     return res
   } catch (error) {
     console.error('Middleware error:', error)
-    // On error, allow the request to proceed
     return res
   }
 } 
