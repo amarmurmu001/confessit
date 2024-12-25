@@ -11,9 +11,9 @@ export default function Home() {
   return (
     <>
       <Navigation />
-      
+
       {/* Hero Section */}
-      <section className="min-h-screen bg-base-200 pt-16 flex items-center">
+      <section className="h-screen bg-white pt-16 flex items-center">
         <div className="container mx-auto px-4 py-16">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
@@ -30,11 +30,17 @@ export default function Home() {
             </div>
             <div className="relative">
               <div className="aspect-square bg-primary/10 rounded-full absolute -top-4 -right-4 animate-pulse"></div>
-              <div className="aspect-video bg-base-100 rounded-2xl shadow-xl p-8 relative">
-                <div className="space-y-4">
-                  <div className="h-4 bg-base-300 rounded-full w-3/4"></div>
-                  <div className="h-4 bg-base-300 rounded-full w-1/2"></div>
-                  <div className="h-4 bg-base-300 rounded-full w-5/6"></div>
+              <div className="container mx-auto px-4">
+                <div className="max-w-2xl mx-auto">
+                  <div className="card bg-base-200 shadow-xl">
+                    <div className="card-body">
+                      <h2 className="card-title text-3xl font-bold text-center mb-6">Share Your Confession</h2>
+                      <p className="text-center text-base-content/70 mb-8">
+                        Your story matters. Share it with our supportive community.
+                      </p>
+                      <ConfessionForm />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -112,22 +118,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Confession Form Section */}
-      <section id="confess" className="py-24 bg-base-100">
-        <div className="container mx-auto px-4">
-          <div className="max-w-2xl mx-auto">
-            <div className="card bg-base-200 shadow-xl">
-              <div className="card-body">
-                <h2 className="card-title text-3xl font-bold text-center mb-6">Share Your Confession</h2>
-                <p className="text-center text-base-content/70 mb-8">
-                  Your story matters. Share it with our supportive community.
-                </p>
-                <ConfessionForm />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Footer */}
       <footer className="bg-base-200 border-t border-base-300">
