@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
+import DeleteModal from './DeleteModal' // Import DeleteModal component
 
 type Confession = {
   id: string
@@ -21,11 +22,15 @@ type AdminDashboardProps = {
 export default function AdminDashboard({ confessions: initialConfessions }: AdminDashboardProps) {
   const [confessions, setConfessions] = useState(initialConfessions)
   const [filter, setFilter] = useState('all')
+  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [confessionToDelete, setConfessionToDelete] = useState<string | null>(null)
+  const [isLoading, setLoading] = useState(false)
   const router = useRouter()
   const supabase = createClientComponentClient()
 
   const handleShare = async (id: string, isShared: boolean) => {
     try {
+      setLoading(true)
       const { error } = await supabase
         .from('confessions')
         .update({ is_shared: isShared })
@@ -36,32 +41,43 @@ export default function AdminDashboard({ confessions: initialConfessions }: Admi
       setConfessions(confessions.map(conf =>
         conf.id === id ? { ...conf, is_shared: isShared } : conf
       ))
-      
+
       toast.success(`Confession ${isShared ? 'shared' : 'unshared'} successfully`)
       router.refresh()
     } catch (error) {
       console.error('Error updating confession:', error)
       toast.error('Failed to update confession')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this confession?')) return
+  const handleDelete = (id: string) => {
+    setConfessionToDelete(id)
+    setDeleteModalOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!confessionToDelete) return
 
     try {
+      setLoading(true)
       const { error } = await supabase
         .from('confessions')
         .delete()
-        .eq('id', id)
+        .eq('id', confessionToDelete)
 
       if (error) throw error
 
-      setConfessions(confessions.filter(conf => conf.id !== id))
+      setConfessions(confessions.filter(conf => conf.id !== confessionToDelete))
       toast.success('Confession deleted successfully')
       router.refresh()
     } catch (error) {
       console.error('Error deleting confession:', error)
       toast.error('Failed to delete confession')
+    } finally {
+      setLoading(false)
+      setDeleteModalOpen(false)
     }
   }
 
@@ -80,34 +96,42 @@ export default function AdminDashboard({ confessions: initialConfessions }: Admi
 
   return (
     <div>
-      <div className="flex justify-center space-x-2 mb-6">
-        {['all', 'today', 'shared', 'not_shared'].map((filterOption) => (
-          <button
-            key={filterOption}
-            className={`btn btn-sm ${filter === filterOption ? 'btn-primary' : 'btn-outline'}`}
-            onClick={() => setFilter(filterOption)}
-          >
-            {filterOption.charAt(0).toUpperCase() + filterOption.slice(1).replace('_', ' ')}
-          </button>
-        ))}
+      <div className="flex justify-center mb-6">
+        <div className="btn-group">
+          {['all', 'today', 'shared', 'not_shared'].map((filterOption) => (
+            <button
+              key={filterOption}
+              className={`btn btn-sm ${filter === filterOption ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => setFilter(filterOption)}
+            >
+              {filterOption.charAt(0).toUpperCase() + filterOption.slice(1).replace('_', ' ')}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {filteredConfessions.length === 0 ? (
+      {isLoading && (
+        <div className="text-center py-8">
+          <div className="loading loading-spinner text-primary"></div>
+        </div>
+      )}
+
+      {filteredConfessions.length === 0 && !isLoading ? (
         <div className="text-center py-8 text-base-content/70">
           No confessions found
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
           {filteredConfessions.map(confession => (
-            <div key={confession.id} className="card bg-base-100 shadow-xl">
+            <div key={confession.id} className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow duration-200">
               <div className="card-body">
-                <p className="text-lg">{confession.confession_text}</p>
-                <p className="text-sm text-base-content/70">
+                <p className="text-lg font-semibold">{confession.confession_text}</p>
+                <p className="text-sm text-base-content/70 mt-2">
                   {confession.is_anonymous ? 'Anonymous' : confession.name} - {
                     new Date(confession.created_at).toLocaleString()
                   }
                 </p>
-                <div className="card-actions justify-end items-center mt-4">
+                <div className="card-actions justify-between items-center mt-4">
                   <label className="label cursor-pointer space-x-2">
                     <span className="label-text">Shared</span>
                     <input
@@ -129,6 +153,12 @@ export default function AdminDashboard({ confessions: initialConfessions }: Admi
           ))}
         </div>
       )}
+
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onDelete={confirmDelete}
+        onCancel={() => setDeleteModalOpen(false)}
+      />
     </div>
   )
 }
