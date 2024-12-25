@@ -1,25 +1,31 @@
 import './globals.css'
+import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import ThemeToggle from '@/components/ThemeToggle'
+import Navigation from '@/components/Navigation'
 import { Providers } from './providers'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata = {
-  title: 'Confessit',
-  description: 'A platform for anonymous confessions',
+export const metadata: Metadata = {
+  title: 'Confessit - Share Your Story Anonymously',
+  description: 'A safe space to share your thoughts, feelings, and experiences without judgment.',
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-
   return (
-    <html lang="en" data-theme="light">
-      <body className={inter.className}>
-        <Providers>{children}</Providers>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.className} min-h-screen bg-base-100 text-base-content`}>
+        <Providers>
+          <Navigation />
+          {children}
+          <ThemeToggle />
+        </Providers>
       </body>
     </html>
-  );
+  )
 }

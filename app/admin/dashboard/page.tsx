@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import AdminDashboard from '@/components/AdminDashboard'
 import SignOutButton from '@/components/SignOutButton'
 import { Metadata } from 'next'
+import Image from 'next/image'
 
 export const metadata: Metadata = {
   title: 'Admin Dashboard - Confessit',
@@ -32,20 +33,33 @@ export default async function AdminDashboardPage() {
   }
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-          <p className="text-base-content/70">Manage and moderate confessions</p>
+    <div className="min-h-screen bg-base-100">
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-4">
+            <Image
+              src="/icon.png"
+              alt="Confessit Logo"
+              width={40}
+              height={40}
+              className="rounded-lg"
+            />
+            <div>
+              <h1 className="text-4xl font-bold text-primary">
+                Admin Dashboard
+              </h1>
+              <p className="text-base-content/60">Manage and moderate confessions</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <p className="text-sm text-base-content/80">
+              Signed in as: {session.user.email}
+            </p>
+            <SignOutButton />
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <p className="text-sm text-base-content/70">
-            Signed in as: {session.user.email}
-          </p>
-          <SignOutButton />
-        </div>
-      </div>
-      <AdminDashboard confessions={confessions || []} />
-    </main>
+        <AdminDashboard confessions={confessions || []} />
+      </main>
+    </div>
   )
 }

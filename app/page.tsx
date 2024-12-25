@@ -1,135 +1,222 @@
-import ConfessionForm from '@/components/ConfessionForm'
-import Navigation from '@/components/Navigation'
-import { Metadata } from 'next'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Confessit - Share Your Secrets',
-  description: 'A safe space for sharing anonymous confessions',
-}
+import { motion } from 'framer-motion'
+import ConfessionForm from '@/components/ConfessionForm'
+import { ArrowRightIcon, SparklesIcon, ShieldCheckIcon, HeartIcon } from '@heroicons/react/24/outline'
 
 export default function Home() {
   return (
-    <>
-      <Navigation />
-
+    <div className="min-h-screen bg-base-100">
       {/* Hero Section */}
-      <section className="h-screen bg-white pt-16 flex items-center">
-        <div className="container mx-auto px-4 py-16">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="text-5xl md:text-6xl font-bold mb-6">
-                Share Your Story,
-                <span className="text-primary"> Anonymously</span>
-              </h1>
-              <p className="text-xl text-base-content/70 mb-8">
-                A safe space to express yourself freely, share your thoughts, and connect with others through anonymous confessions.
-              </p>
-              <a href="#confess" className="btn btn-primary btn-lg">
-                Share Your Confession
-              </a>
+      <div className="pt-32 pb-20 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-5xl md:text-6xl font-bold text-base-content mb-6">
+              Share Your Story,
+              <span className="text-primary"> Anonymously</span>
+            </h1>
+            <p className="text-xl text-base-content/60 mb-8 max-w-2xl mx-auto">
+              A safe space to share your thoughts, feelings, and experiences without judgment.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="flex justify-center gap-4"
+          >
+            <a 
+              href="#confess" 
+              className="group flex items-center gap-2 px-6 py-3 bg-primary text-primary-content rounded-full text-lg font-medium hover:bg-primary/90 transition-all"
+            >
+              Share Now
+              <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </a>
+          </motion.div>
+
+          {/* Trust Indicators */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="mt-12 flex flex-wrap justify-center gap-8"
+          >
+            <div className="flex items-center gap-2 text-base-content/60">
+              <SparklesIcon className="w-5 h-5 text-primary" />
+              <span>100% Anonymous</span>
             </div>
-            <div className="relative">
-              <div className="aspect-square bg-primary/10 rounded-full absolute -top-4 -right-4 animate-pulse"></div>
-              <div className="container mx-auto px-4">
-                <div className="max-w-2xl mx-auto">
-                  <div className="card bg-base-200 shadow-xl">
-                    <div className="card-body">
-                      <h2 className="card-title text-3xl font-bold text-center mb-6">Share Your Confession</h2>
-                      <p className="text-center text-base-content/70 mb-8">
-                        Your story matters. Share it with our supportive community.
-                      </p>
-                      <ConfessionForm />
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="flex items-center gap-2 text-base-content/60">
+              <ShieldCheckIcon className="w-5 h-5 text-primary" />
+              <span>Safe & Secure</span>
             </div>
-          </div>
+            <div className="flex items-center gap-2 text-base-content/60">
+              <HeartIcon className="w-5 h-5 text-primary" />
+              <span>Supportive Community</span>
+            </div>
+          </motion.div>
         </div>
-      </section>
+      </div>
 
       {/* Features Section */}
-      <section id="features" className="py-24 bg-base-100">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-16">Why Choose Confessit</h2>
+      <section id="features" className="py-20 px-4 bg-base-100">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-base-content mb-4">
+              Why Choose Confessit?
+            </h2>
+            <p className="text-xl text-base-content/60">
+              Express yourself freely in a safe and supportive environment
+            </p>
+          </motion.div>
+
           <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                title: 'Complete Anonymity',
-                description: 'Share your thoughts without revealing your identity. Your privacy is our top priority.',
-                icon: '🔒'
-              },
-              {
-                title: 'Safe Space',
-                description: 'A supportive community where you can express yourself without judgment.',
-                icon: '💭'
-              },
-              {
-                title: 'Easy to Use',
-                description: 'Simple and intuitive interface makes sharing your confessions effortless.',
-                icon: '✨'
-              }
-            ].map((feature, index) => (
-              <div key={index} className="card bg-base-200 hover:shadow-xl transition-shadow">
-                <div className="card-body text-center">
-                  <div className="text-4xl mb-4">{feature.icon}</div>
-                  <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                  <p className="text-base-content/70">{feature.description}</p>
+            {features.map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.2, duration: 0.5 }}
+                viewport={{ once: true }}
+                className="p-6 rounded-2xl bg-base-200 hover:bg-base-300 transition-colors"
+              >
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${feature.iconBg}`}>
+                  {feature.icon}
                 </div>
-              </div>
+                <h3 className="text-xl font-semibold text-base-content mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-base-content/60">
+                  {feature.description}
+                </p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-24 bg-base-200">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-16">How It Works</h2>
+      <section id="how-it-works" className="py-20 px-4 bg-base-200">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-base-content mb-4">
+              How It Works
+            </h2>
+            <p className="text-xl text-base-content/60">
+              Share your story in three simple steps
+            </p>
+          </motion.div>
+
           <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                step: '01',
-                title: 'Write Your Confession',
-                description: 'Share your thoughts, experiences, or secrets in our simple confession form.'
-              },
-              {
-                step: '02',
-                title: 'Choose Anonymity',
-                description: 'Decide whether to share your name or remain completely anonymous.'
-              },
-              {
-                step: '03',
-                title: 'Submit & Connect',
-                description: 'Your confession will be shared with our community after moderation.'
-              }
-            ].map((step, index) => (
-              <div key={index} className="relative">
-                <div className="text-6xl font-bold text-primary/20 absolute -top-8 left-0">
-                  {step.step}
+            {steps.map((step, index) => (
+              <motion.div
+                key={step.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.2, duration: 0.5 }}
+                viewport={{ once: true }}
+                className="relative"
+              >
+                <div className="text-center">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                    {index + 1}
+                  </div>
+                  <h3 className="text-xl font-semibold text-base-content mb-2">
+                    {step.title}
+                  </h3>
+                  <p className="text-base-content/60">
+                    {step.description}
+                  </p>
                 </div>
-                <div className="pt-8">
-                  <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-                  <p className="text-base-content/70">{step.description}</p>
-                </div>
-              </div>
+                {index < steps.length - 1 && (
+                  <ArrowRightIcon className="hidden md:block absolute top-12 -right-4 w-8 h-8 text-base-content/20" />
+                )}
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      
-
-      {/* Footer */}
-      <footer className="bg-base-200 border-t border-base-300">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <p className="text-base-content/70">
-              © {new Date().getFullYear()} Confessit. All rights reserved.
+      {/* Confession Form Section */}
+      <section id="confess" className="py-20 px-4 bg-base-100">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-base-content mb-4">
+              Share Your Confession
+            </h2>
+            <p className="text-xl text-base-content/60">
+              Your story matters. Share it anonymously with our community.
             </p>
-          </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            viewport={{ once: true }}
+          >
+            <ConfessionForm />
+          </motion.div>
         </div>
-      </footer>
-    </>
+      </section>
+    </div>
   )
 }
+
+const features = [
+  {
+    title: 'Complete Anonymity',
+    description: 'Share without revealing your identity. Your privacy is our top priority.',
+    icon: <SparklesIcon className="w-6 h-6 text-primary" />,
+    iconBg: 'bg-primary/10'
+  },
+  {
+    title: 'Safe Environment',
+    description: 'A moderated space free from harassment and harmful content.',
+    icon: <ShieldCheckIcon className="w-6 h-6 text-primary" />,
+    iconBg: 'bg-primary/10'
+  },
+  {
+    title: 'Supportive Community',
+    description: 'Connect with others who understand and support your journey.',
+    icon: <HeartIcon className="w-6 h-6 text-primary" />,
+    iconBg: 'bg-primary/10'
+  }
+]
+
+const steps = [
+  {
+    title: 'Write Your Story',
+    description: 'Share your thoughts and feelings in a judgment-free space.'
+  },
+  {
+    title: 'Submit Anonymously',
+    description: 'Your identity remains completely private and protected.'
+  },
+  {
+    title: 'Connect & Heal',
+    description: 'Be part of a supportive community that understands.'
+  }
+]
