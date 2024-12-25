@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
-import { PostgrestError } from '@supabase/supabase-js'
+import { AuthError } from '@supabase/supabase-js'
 
 
 export default function Auth() {
@@ -39,7 +39,7 @@ const handleAuth = async (e: React.FormEvent) => {
       return
     }
 
-    let error: PostgrestError | null = null;
+    let error: AuthError | null = null;
 
     if (isLogin) {
       const { error: loginError } = await supabase.auth.signInWithPassword({
@@ -62,8 +62,12 @@ const handleAuth = async (e: React.FormEvent) => {
 
     toast.success(isLogin ? 'Logged in successfully' : 'Check your email to confirm your account')
     router.push('/admin/dashboard')
-  } catch (error: PostgrestError) {
-    toast.error(error.message)
+  } catch (error) {
+    if (error instanceof AuthError) {
+      toast.error(error.message)
+    } else {
+      toast.error('An unexpected error occurred')
+    }
   } finally {
     setIsLoading(false)
   }
